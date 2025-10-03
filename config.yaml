@@ -1,0 +1,127 @@
+﻿# ==============================================================================
+# FUSED HIGH-FIDELITY CONFIGURATION FOR THE STUDY
+# "Quantifying Semantic Shift in Financial NLP"
+# ==============================================================================
+
+# --------------------------------------------------------------------------
+# SECTION 1: EXPERIMENTAL DESIGN & DATA PARTITIONING
+# --------------------------------------------------------------------------
+experimental_design:
+  # Defines the temporal windows for the entire study. (Source: Table 1)
+  regime_definitions:
+    - regime_name: "Pre-COVID"
+      start_date: "2019-11-01"
+      end_date: "2019-12-31"
+    - regime_name: "COVID"
+      start_date: "2020-01-01"
+      end_date: "2020-03-23"
+    - regime_name: "Post-COVID"
+      start_date: "2020-05-01"
+      end_date: "2020-07-01"
+    - regime_name: "Rate-Hike"
+      start_date: "2022-02-15"
+      end_date: "2022-06-15"
+
+  # Defines the chronological data split ratios within each regime. (Source: Section 5.1)
+  data_split_ratios:
+    training: 0.60
+    validation: 0.20
+    testing: 0.20
+
+# --------------------------------------------------------------------------
+# SECTION 2: FEATURE ENGINEERING PARAMETERS
+# --------------------------------------------------------------------------
+feature_engineering:
+  tfidf:
+    # (Source: Section 5.1)
+    max_features: 2000
+  sentence_embeddings:
+    # Full HuggingFace identifier for the sentence embedding model. (Source: Section 5.1)
+    model_identifier: "sentence-transformers/all-MiniLM-L6-v2"
+    # Intrinsic property of the model.
+    embedding_dimension: 384
+
+# --------------------------------------------------------------------------
+# SECTION 3: MODEL ARCHITECTURE & TRAINING SPECIFICATIONS
+# --------------------------------------------------------------------------
+model_training:
+  # Global parameters applied to all training sessions.
+  global_params:
+    learning_rate: 0.001           # Source: Section 4.2
+    batch_size: 64                 # Source: Section 4.2
+    optimizer: "Adam"              # Source: Section 5.5
+    loss_function: "MeanSquaredError"  # Source: Section 5.3, Equation (7)
+
+  # Architecture-specific hyperparameters.
+  architectures:
+    lstm:
+      # Input size is derived from feature_engineering.tfidf.max_features.
+      input_size: 2000
+      hidden_size: 256           # Source: Section 4.2
+      dropout: 0.2                # Source: Section 4.2
+    text_transformer:
+      # The specific pre-trained model identifier for HuggingFace. (Source: Section 4.2)
+      base_model_identifier: "distilbert-base-uncased"
+      # Intrinsic property of distilbert-base-uncased.
+      hidden_size: 768
+      dropout: 0.2                # Source: Section 4.2
+    feature_transformer:
+      # Input size is the sum of TF-IDF and MiniLM dimensions (2000 + 384).
+      input_size: 2384
+      hidden_size: 256           # Source: Section 4.2
+      dropout: 0.2                # Source: Section 4.2
+
+# --------------------------------------------------------------------------
+# SECTION 4: DIAGNOSTIC METRIC COMPUTATION PARAMETERS
+# --------------------------------------------------------------------------
+diagnostics:
+  # Configuration for the NLI-based Logical Consistency Score (NLICS).
+  nlics_metric:
+    llm_provider: "OpenAI"
+    # The paper specifies "GPT-4 (April 2024 version)". (Source: Section 5.4)
+    llm_model_identifier: "gpt-4-turbo-2024-04-09"
+    
+    # --- SECURITY NOTE ---
+    # API keys must NEVER be hard-coded in a config file.
+    # The Python code that loads this YAML should be responsible for
+    # retrieving the key from an environment variable (e.g., OPENAI_API_KEY).
+    api_key: "ENV_OPENAI_API_KEY"
+
+    # Settings for the API call to ensure deterministic and efficient responses.
+    llm_settings:
+      # Temperature 0.0 is crucial for analytical, deterministic tasks.
+      temperature: 0.0
+      # The expected response is a single word, so a small token limit is sufficient.
+      max_tokens: 5
+      # Requesting log probabilities is essential for verifying the confidence threshold.
+      logprobs: true
+
+    # Rules for converting the LLM's text response into a numerical score. (Source: Section 5.4)
+    scoring_rules:
+      confidence_threshold: 0.80
+      score_mapping:
+        "Yes": 1.0
+        "No": 0.0
+        "Uncertain": 0.5
+
+    # The full, high-fidelity prompt template for the NLICS evaluation. (Source: Section 5.4)
+    prompt_template:
+      system: |
+        You are an expert financial analyst specializing in Natural Language Inference (NLI). Your task is to assess the logical relationship between a financial news excerpt and a prediction about a stock's movement.
+
+        Analyze the provided news text as the premise and the prediction as the hypothesis. Determine if the premise logically supports the hypothesis.
+
+        You MUST respond with ONLY ONE of the following three words:
+        - 'Yes' if the news logically supports the prediction.
+        - 'No' if the news logically contradicts the prediction or provides no support.
+        - 'Uncertain' if there is not enough information to make a clear judgment.
+
+        Do NOT provide any explanations, justifications, or additional text. Your entire response must be a single word.
+      user: |
+        News: "{news_excerpt}"
+
+        Prediction: "{prediction_hypothesis}"
+
+        Question: Is the prediction logically supported by the news?
+
+        Answer:
