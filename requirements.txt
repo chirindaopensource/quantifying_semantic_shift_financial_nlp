@@ -1,0 +1,192 @@
+﻿# ==============================================================================
+# requirements.txt
+# Production-Grade Dependencies for Financial NLP Semantic Shift Framework
+# 
+# Paper: "Quantifying Semantic Shift in Financial NLP: Robust Metrics for 
+#         Market Prediction Stability" (Sun et al., 2025)
+# arXiv: 2510.00205v1
+#
+# Python Version: 3.9+
+# Last Updated: 2025-01-29
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# Core Scientific Computing Stack
+# ------------------------------------------------------------------------------
+numpy==1.26.4
+# High-performance numerical arrays; foundation for all scientific computing
+# Pinned for stability with PyTorch and scikit-learn
+
+pandas==2.2.0
+# Structured data manipulation and time-series analysis
+# Critical for handling financial datasets with datetime indices
+
+scipy==1.12.0
+# Advanced scientific computing, sparse matrices (csr_matrix), statistical tests
+# Required for entropy calculations, spearmanr correlations, and TF-IDF storage
+
+# ------------------------------------------------------------------------------
+# Machine Learning Framework
+# ------------------------------------------------------------------------------
+scikit-learn==1.4.0
+# Classical ML algorithms, feature extraction (TfidfVectorizer), manifold learning (t-SNE)
+# Provides train_test_split, model evaluation metrics
+
+# ------------------------------------------------------------------------------
+# Deep Learning Stack (PyTorch)
+# ------------------------------------------------------------------------------
+torch==2.2.0
+# Core deep learning framework for LSTM, Transformer architectures
+# Version 2.2.0 provides stable CUDA 12.1 support and mixed precision training
+# For CPU-only: pip install torch==2.2.0 --index-url https://download.pytorch.org/whl/cpu
+
+# ------------------------------------------------------------------------------
+# Natural Language Processing
+# ------------------------------------------------------------------------------
+transformers==4.37.2
+# HuggingFace library for pretrained models (DistilBERT, tokenizers, NLI pipeline)
+# Provides AutoTokenizer, DistilBertModel, pipeline for zero-shot classification
+# Version 4.37.2 ensures compatibility with PyTorch 2.2.0
+
+sentence-transformers==2.3.1
+# Pretrained sentence embedding models (all-MiniLM-L6-v2)
+# Handles dense semantic representations for financial text
+# Built on top of transformers and PyTorch
+
+tokenizers==0.15.1
+# Fast tokenization backend for transformers (automatically installed but pinned)
+# Ensures consistent text preprocessing across environments
+
+# ------------------------------------------------------------------------------
+# LLM API Integration
+# ------------------------------------------------------------------------------
+openai==1.10.0
+# Official OpenAI Python client for GPT-based NLI consistency scoring
+# Provides AsyncOpenAI for asynchronous, rate-limited API calls
+# Version 1.10.0 includes improved error handling and logprobs support
+
+# ------------------------------------------------------------------------------
+# Data Visualization
+# ------------------------------------------------------------------------------
+matplotlib==3.8.2
+# Foundational plotting library for loss curves, t-SNE visualizations, metric trends
+# Stable release with improved performance and layout engines
+
+seaborn==0.13.1
+# Statistical data visualization built on matplotlib
+# Provides elegant themes and complex multi-plot layouts for academic figures
+
+# ------------------------------------------------------------------------------
+# Progress Monitoring
+# ------------------------------------------------------------------------------
+tqdm==4.66.1
+# Progress bars for loops, async operations, and iterables
+# Essential for monitoring long-running training and evaluation jobs
+# Includes tqdm.auto, tqdm.asyncio for flexible deployment
+
+# ------------------------------------------------------------------------------
+# Interactive Development (Optional but Recommended)
+# ------------------------------------------------------------------------------
+ipython==8.20.0
+# Enhanced interactive Python shell with display utilities
+# Required for IPython.display (HTML, display) in notebook environments
+# Can be removed if running purely as scripts
+
+jupyter==1.0.0
+# Full Jupyter ecosystem for notebook-based development
+# Optional: remove if deploying as production service
+
+# ------------------------------------------------------------------------------
+# Additional Implicit Dependencies (Transitive)
+# ------------------------------------------------------------------------------
+# These are typically auto-installed but pinned for explicit control:
+
+huggingface-hub==0.20.3
+# Model repository interface used by transformers and sentence-transformers
+# Manages model downloads and caching
+
+safetensors==0.4.2
+# Secure tensor serialization format used by HuggingFace models
+# Faster and safer than pickle for model weights
+
+filelock==3.13.1
+# Cross-platform file locking for concurrent model downloads
+# Used by HuggingFace libraries for cache management
+
+requests==2.31.0
+# HTTP library for API calls and data downloads
+# Used by yfinance, OpenAI, and HuggingFace
+
+urllib3==2.1.0
+# HTTP client used by requests
+# Pinned to avoid security vulnerabilities
+
+certifi==2024.2.2
+# SSL certificate bundle for secure HTTPS connections
+# Critical for API calls to OpenAI and model downloads
+
+# ------------------------------------------------------------------------------
+# Financial Data Acquisition (Implied by Context)
+# ------------------------------------------------------------------------------
+yfinance==0.2.36
+# Yahoo Finance API wrapper for market data retrieval
+# Not explicitly imported but referenced in documentation
+# Handles adjusted close prices, dividends, stock splits
+
+# ------------------------------------------------------------------------------
+# Type Checking and Code Quality (Development)
+# ------------------------------------------------------------------------------
+# Uncomment for development environments:
+# mypy==1.8.0
+# pycodestyle==2.11.1
+# pylint==3.0.3
+
+# ==============================================================================
+# Installation Instructions
+# ==============================================================================
+#
+# Standard Installation (CPU):
+# $ pip install -r requirements.txt
+#
+# GPU-Accelerated Installation (CUDA 12.1):
+# $ pip install -r requirements.txt
+# $ pip install torch==2.2.0 --index-url https://download.pytorch.org/whl/cu121
+#
+# Development Installation (includes type checking):
+# $ pip install -r requirements.txt
+# $ pip install mypy pycodestyle pylint
+#
+# Verify Installation:
+# $ python -c "import torch; print(f'PyTorch: {torch.__version__}, CUDA: {torch.cuda.is_available()}')"
+# $ python -c "import transformers; print(f'Transformers: {transformers.__version__}')"
+#
+# ==============================================================================
+# Platform-Specific Notes
+# ==============================================================================
+#
+# macOS (Apple Silicon):
+# PyTorch supports Metal Performance Shaders (MPS) acceleration:
+# $ pip install torch==2.2.0 torchvision torchaudio
+#
+# Windows:
+# Ensure Microsoft Visual C++ 14.0+ is installed for building extensions
+# Download from: https://visualstudio.microsoft.com/visual-cpp-build-tools/
+#
+# Linux (CUDA):
+# Verify CUDA toolkit version matches PyTorch build:
+# $ nvcc --version
+# $ nvidia-smi
+#
+# ==============================================================================
+# Security Considerations
+# ==============================================================================
+#
+# Regular Updates:
+# Check for security patches: $ pip list --outdated
+# Update cautiously: $ pip install --upgrade <package>==<new_version>
+#
+# Vulnerability Scanning:
+# $ pip install safety
+# $ safety check --file requirements.txt
+#
+# ==============================================================================
